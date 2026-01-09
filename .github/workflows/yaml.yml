@@ -3,15 +3,17 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url:
-        description: 'Link IPA'
+        description: 'Lipește link-ul IPA'
         required: true
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Descărcare IPA
-        run: curl -L "${{ github.event.inputs.ipa_url }}" -o game.ipa
+      - name: Descărcare IPA (Cu Reîncercare)
+        run: |
+          # Folosim parametri care forțează curl să reîncerce dacă pică conexiunea
+          curl -L --retry 5 --retry-delay 5 --connect-timeout 60 "${{ github.event.inputs.ipa_url }}" -o game.ipa
           
       - name: Extragere Fișiere
         run: |
@@ -23,7 +25,6 @@ jobs:
         run: |
           curl -L https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip -o dumper.zip
           unzip dumper.zip -d dumper_tool
-          # Nu mai avem nevoie de chmod pentru varianta .net core, o rulăm direct cu dotnet
 
       - name: Executare Scanare
         run: |
