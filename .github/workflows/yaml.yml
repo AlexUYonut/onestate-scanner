@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url:
-        description: 'Lipește link-ul de download direct'
+        description: 'Lipește link-ul de download direct aici'
         required: true
 
 jobs:
