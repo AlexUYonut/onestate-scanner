@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url:
-        description: 'Lipește link-ul de download direct'
+        description: 'Link IPA'
         required: true
 
 jobs:
@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descărcare IPA
-        run: |
-          curl -L "${{ github.event.inputs.ipa_url }}" -o game.ipa
+        run: curl -L "${{ github.event.inputs.ipa_url }}" -o game.ipa
           
       - name: Extragere Fișiere
         run: |
@@ -20,16 +19,17 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Rulare IL2CPP Dumper
-        uses: Perfare/Il2CppDumper-action@master
-        with:
-          executable_path: ./binary
-          metadata_path: ./metadata.dat
+      - name: Pregătire Dumper
+        run: |
+          wget https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip
+          unzip Il2CppDumper-linux-x64.zip -d dumper_tool
+          chmod +x dumper_tool/Il2CppDumper
+
+      - name: Executare Scanare
+        run: ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
         with:
           name: Dump-OneState
-          path: |
-            DummyDll/
-            dump.cs
+          path: output/
