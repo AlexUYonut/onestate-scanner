@@ -21,12 +21,13 @@ jobs:
 
       - name: Pregătire Dumper
         run: |
-          wget https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip
-          unzip Il2CppDumper-linux-x64.zip -d dumper_tool
-          chmod +x dumper_tool/Il2CppDumper
+          curl -L https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip -o dumper.zip
+          unzip dumper.zip -d dumper_tool
+          # Nu mai avem nevoie de chmod pentru varianta .net core, o rulăm direct cu dotnet
 
       - name: Executare Scanare
-        run: ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
+        run: |
+          dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
