@@ -1,0 +1,36 @@
+name: OneState Auto Scanner
+on: 
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: 'Lipește link-ul direct către IPA-ul de One State'
+        required: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descărcare IPA
+        run: |
+          curl -L "${{ github.event.inputs.ipa_url }}" -o game.ipa
+          
+      - name: Extragere Fișiere (Binary & Metadata)
+        run: |
+          unzip game.ipa -d temp_ipa
+          # Caută automat fișierele prin orice structură de foldere
+          find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
+          find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
+
+      - name: Rulare IL2CPP Dumper
+        uses: its-igris/Il2CppDumper-action@main
+        with:
+          executable_path: ./binary
+          metadata_path: ./metadata.dat
+
+      - name: Salvare Rezultate (Offsets)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dump-OneState
+          path: |
+            DummyDll/
+            dump.cs
