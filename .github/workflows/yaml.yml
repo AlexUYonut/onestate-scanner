@@ -1,0 +1,34 @@
+name: OneState Auto Scanner
+on: 
+  workflow_dispatch:
+    inputs:
+      ipa_url: https://armconverter.com/decryptedappstore/download/1597760047/com.Chillgaming.oneState/0.46.2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjc0OTM5NCIsImlhdCI6MTc2NzkyODY2NiwiZXhwIjoxNzY3OTM5NDY2LCJhcHBpZCI6MTU5Nzc2MDA0NywiYXBwdmVyIjoiMC40Ni4yIn0.cBT6JCuQCh420esrN5VxDwmu9hwwzRobNnHLA-FuNp8
+        description: 'Lipește link-ul de download direct pentru IPA'
+        required: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descărcare IPA
+        run: |
+          curl -L "${{ github.event.inputs.ipa_url }}" -o game.ipa
+          
+      - name: Extragere Fișiere
+        run: |
+          unzip game.ipa -d temp_ipa
+          find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
+          find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
+
+      - name: Rulare IL2CPP Dumper
+        uses: its-igris/Il2CppDumper-action@main
+        with:
+          executable_path: ./binary
+          metadata_path: ./metadata.dat
+
+      - name: Salvare Rezultate (Offsets)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dump-OneState
+          path: |
+            dump.cs
