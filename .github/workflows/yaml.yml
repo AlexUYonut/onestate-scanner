@@ -2,8 +2,8 @@ name: OneState Auto Scanner
 on: 
   workflow_dispatch:
     inputs:
-      ipa_url: https://armconverter.com/decryptedappstore/download/1597760047/com.Chillgaming.oneState/0.46.2?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjc0OTM5NCIsImlhdCI6MTc2NzkyODY2NiwiZXhwIjoxNzY3OTM5NDY2LCJhcHBpZCI6MTU5Nzc2MDA0NywiYXBwdmVyIjoiMC40Ni4yIn0.cBT6JCuQCh420esrN5VxDwmu9hwwzRobNnHLA-FuNp8
-        description: 'Lipește link-ul de download direct pentru IPA'
+      ipa_url:
+        description: 'Lipește link-ul de download direct'
         required: true
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
           executable_path: ./binary
           metadata_path: ./metadata.dat
 
-      - name: Salvare Rezultate (Offsets)
+      - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
         with:
           name: Dump-OneState
