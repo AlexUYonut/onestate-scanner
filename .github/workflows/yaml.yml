@@ -19,17 +19,26 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Scanare Locală (Fără Dumper)
+      - name: Scanare Avansată Offsets
         run: |
-          # Creăm un script rapid care extrage textele (strings) din binar
-          # Asta ne va da numele funcțiilor și offset-urile fără să avem nevoie de Il2CppDumper
-          strings ./binary | grep -E "Weapon|Player|Health|Aim|Speed" > potential_offsets.txt
+          echo "=== ANALIZĂ ONESTATE POSIBILE OFFSETS ===" > rezultate_scanare.txt
           
+          echo -e "\n[1] AIMBOT & ROTATION:" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -E "GetLocalSpaceAim|set_rotation|get_rotation|lookAt" | head -n 20 >> rezultate_scanare.txt
+          
+          echo -e "\n[2] ESP & POSITION:" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -E "WorldToScreen|get_position|set_position|Distance" | head -n 20 >> rezultate_scanare.txt
+          
+          echo -e "\n[3] HEALTH & GODMODE:" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -E "Health|get_isDead|set_health|Damage" | head -n 20 >> rezultate_scanare.txt
+          
+          echo -e "\n[4] VEHICLE & SPEED:" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -E "VehicleSpeed|EngineRotation|Nitro" | head -n 20 >> rezultate_scanare.txt
+
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
         with:
-          name: OneState-Data
+          name: OneState-Final-Offsets
           path: |
+            rezultate_scanare.txt
             metadata.dat
-            binary
-            potential_offsets.txt
