@@ -1,4 +1,4 @@
-Name: OneState Auto Scanner
+name: OneState Auto Scanner
 on: 
   workflow_dispatch:
     inputs:
@@ -23,23 +23,20 @@ jobs:
         run: |
           echo "=== ANALIZĂ ONESTATE POSIBILE OFFSETS ===" > rezultate_scanare.txt
           
-          echo -e "\n[1] AIMBOT & ROTATION:" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "GetLocalSpaceAim|set_rotation|get_rotation|lookAt|aimbot|headshot" | head -n 30 >> rezultate_scanare.txt
+          echo -e "\n[1] PLAYER SPEED & BIG JUMP (Viteza ta și Săritură):" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_speed|set_speed|WalkSpeed|RunSpeed|MovementSpeed|JumpHeight|JumpPower|GravityMultiplier|set_jump" | head -n 50 >> rezultate_scanare.txt
           
-          echo -e "\n[2] PLAYER MOVEMENT (Speed & Jump):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_speed|set_speed|WalkSpeed|RunSpeed|MovementSpeed|JumpHeight|JumpPower|get_isGrounded|GravityMultiplier" | head -n 40 >> rezultate_scanare.txt
+          echo -e "\n[2] PLAYER FREEZE & STUCK (Troll jucători - Înghețare):" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "set_isFrozen|Freeze|set_active|set_enabled|set_isStatic|StopMovement|Anchor|isControlled" | head -n 40 >> rezultate_scanare.txt
           
-          echo -e "\n[3] FREEZE & STUCK (Troll jucători):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "set_isFrozen|Freeze|set_active|set_enabled|set_isStatic|StopMovement|Anchor" | head -n 30 >> rezultate_scanare.txt
+          echo -e "\n[3] VEHICLE TROLL (Mass, Speed, Gravity):" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "VehicleSpeed|EngineRotation|Nitro|set_mass|AddForce|Rigidbody|Gravity|Force|BrakeForce|Acceleration|Torque" | head -n 60 >> rezultate_scanare.txt
           
-          echo -e "\n[4] HEALTH & GODMODE:" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "Health|get_isDead|set_health|Damage|Invincible" | head -n 30 >> rezultate_scanare.txt
-          
-          echo -e "\n[5] VEHICLE TROLL (Mass, Speed, Gravity):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "VehicleSpeed|EngineRotation|Nitro|set_mass|AddForce|Rigidbody|Gravity|Force|BrakeForce|Acceleration" | head -n 50 >> rezultate_scanare.txt
+          echo -e "\n[4] WORLD PHYSICS (Aruncat pe mapă):" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_gravity|set_gravity|Collision|Explosion|Push|Knockback|Impact|AirResistance" | head -n 40 >> rezultate_scanare.txt
 
-          echo -e "\n[6] WORLD & PHYSICS TROLL:" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_gravity|set_gravity|Collision|Explosion|Push|Knockback" | head -n 30 >> rezultate_scanare.txt
+          echo -e "\n[5] AIMBOT & HEALTH:" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "GetLocalSpaceAim|set_rotation|lookAt|Health|get_isDead|set_health|Damage" | head -n 40 >> rezultate_scanare.txt
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
