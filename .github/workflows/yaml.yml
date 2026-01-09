@@ -19,18 +19,17 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Pregătire Dumper prin Clonare
+      - name: Instalare Dumper Modern
         run: |
-          # Clonăm direct codul sursă, metodă care nu poate fi blocată de 404
-          git clone https://github.com/Perfare/Il2CppDumper.git
-          cd Il2CppDumper
-          # Îl compilăm pe loc în 10 secunde
-          dotnet build -c Release
+          # Folosim binarul de Linux deja compilat ca să nu mai avem probleme cu versiunile de .NET
+          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip" -o dumper.zip
+          unzip -o dumper.zip -d dumper_tool
+          chmod +x dumper_tool/Il2CppDumper
 
       - name: Executare Scanare
         run: |
-          # Rulăm binarul proaspăt compilat
-          dotnet Il2CppDumper/Il2CppDumper/bin/Release/net6.0/Il2CppDumper.dll ./binary ./metadata.dat ./output
+          # Rulăm binarul nativ de Linux, nu varianta .dll
+          ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
