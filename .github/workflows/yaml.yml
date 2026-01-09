@@ -11,22 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descărcare IPA
-        run: wget -O game.ipa --no-check-certificate "${{ github.event.inputs.ipa_url }}"
+        run: wget -v -O game.ipa "${{ github.event.inputs.ipa_url }}"
           
-      - name: Extragere Fișiere
+      - name: Extragere Fișiere Joc
         run: |
           unzip game.ipa -d temp_ipa
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper (Cale Directă)
+      - name: Instalare Dumper (Sursă Alternativă)
         run: |
-          # Folosim un link direct către executabilul brut, fără ZIP
+          # Folosim un mirror direct pentru a evita eroarea 404 de pe GitHub
           mkdir dumper_tool
-          cd dumper_tool
-          wget https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip
-          unzip -o Il2CppDumper-net6.0.zip
-          chmod +x Il2CppDumper.dll
+          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip" -o dumper_tool/dumper.zip
+          cd dumper_tool && unzip dumper.zip
 
       - name: Executare Scanare
         run: |
