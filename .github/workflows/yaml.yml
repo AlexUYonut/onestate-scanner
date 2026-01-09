@@ -19,14 +19,14 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper (Metoda Microsoft)
+      - name: Instalare Dumper
         run: |
-          dotnet tool install --global il2cppdumper --version 6.7.40 || true
-          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
+          dotnet tool install --global il2cppdumper --version 6.7.40
 
       - name: Executare Scanare
         run: |
-          Il2CppDumper ./binary ./metadata.dat ./output
+          # Rulăm folosind calea directă unde dotnet instalează uneltele
+          /home/runner/.dotnet/tools/il2cppdumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
