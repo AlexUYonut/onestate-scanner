@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descărcare IPA
-        run: |
-          wget -O game.ipa --tries=10 --waitretry=5 "${{ github.event.inputs.ipa_url }}"
+        run: wget -O game.ipa --tries=10 --waitretry=5 "${{ github.event.inputs.ipa_url }}"
           
       - name: Extragere Fișiere
         run: |
@@ -20,16 +19,14 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper Direct
+      - name: Instalare Dumper (Metoda Microsoft)
         run: |
-          # Descărcăm varianta de Windows și o rulăm cu Wine (este cea mai stabilă metodă pe GitHub Actions)
-          sudo apt-get update && sudo apt-get install -y wine-stable
-          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip" -o dumper.zip
-          unzip dumper.zip -d dumper_tool
+          dotnet tool install --global il2cppdumper --version 6.7.40 || true
+          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Executare Scanare
         run: |
-          dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
+          Il2CppDumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
