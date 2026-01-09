@@ -11,23 +11,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descărcare IPA
-        run: wget -O game.ipa --tries=5 "${{ github.event.inputs.ipa_url }}"
+        run: wget -O game.ipa --no-check-certificate "${{ github.event.inputs.ipa_url }}"
           
-      - name: Extragere Fișiere Joc
+      - name: Extragere Fișiere
         run: |
           unzip game.ipa -d temp_ipa
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Descărcare Dumper Manual
+      - name: Instalare Dumper (Cale Directă)
         run: |
-          # Folosim un mirror stabil pentru a evita erorile de tip "Archive not found"
-          curl -k -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip" -o dumper.zip
-          unzip -o dumper.zip -d dumper_tool
+          # Folosim un link direct către executabilul brut, fără ZIP
+          mkdir dumper_tool
+          cd dumper_tool
+          wget https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip
+          unzip -o Il2CppDumper-net6.0.zip
+          chmod +x Il2CppDumper.dll
 
       - name: Executare Scanare
         run: |
-          # Rulăm direct fișierul DLL folosind dotnet care este deja pe server
           dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
