@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       ipa_url:
-        description: 'Lipește link-ul de download direct aici'
+        description: 'Lipește link-ul de download direct'
         required: true
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
       - name: Rulare IL2CPP Dumper
-        uses: its-igris/Il2CppDumper-action@main
+        uses: Perfare/Il2CppDumper-action@master
         with:
           executable_path: ./binary
           metadata_path: ./metadata.dat
@@ -31,4 +31,5 @@ jobs:
         with:
           name: Dump-OneState
           path: |
+            DummyDll/
             dump.cs
