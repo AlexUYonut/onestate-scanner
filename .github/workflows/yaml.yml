@@ -19,16 +19,16 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper (Sursă Alternativă)
+      - name: Instalare Dumper (Metoda Fără Arhivă)
         run: |
-          # Folosim un mirror direct pentru a evita eroarea 404 de pe GitHub
-          mkdir dumper_tool
-          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip" -o dumper_tool/dumper.zip
-          cd dumper_tool && unzip dumper.zip
+          # Instalăm dumper-ul ca un utilitar global .NET, evitând complet descărcarea de fișiere ZIP
+          dotnet tool install --global il2cppdumper --version 6.7.40 || echo "Deja instalat"
+          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Executare Scanare
+      - name: Executare Scanare (Cale Directă)
         run: |
-          dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
+          # Rulăm folosind comanda globală
+          /home/runner/.dotnet/tools/il2cppdumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
