@@ -1,4 +1,4 @@
-Name:OneState Auto Scanner
+Name: OneState Auto Scanner
 on: 
   workflow_dispatch:
     inputs:
