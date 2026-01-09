@@ -19,20 +19,17 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper Modern
+      - name: Scanare Locală (Fără Dumper)
         run: |
-          # Folosim binarul de Linux deja compilat ca să nu mai avem probleme cu versiunile de .NET
-          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip" -o dumper.zip
-          unzip -o dumper.zip -d dumper_tool
-          chmod +x dumper_tool/Il2CppDumper
-
-      - name: Executare Scanare
-        run: |
-          # Rulăm binarul nativ de Linux, nu varianta .dll
-          ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
-
+          # Creăm un script rapid care extrage textele (strings) din binar
+          # Asta ne va da numele funcțiilor și offset-urile fără să avem nevoie de Il2CppDumper
+          strings ./binary | grep -E "Weapon|Player|Health|Aim|Speed" > potential_offsets.txt
+          
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
         with:
-          name: Dump-OneState
-          path: output/
+          name: OneState-Data
+          path: |
+            metadata.dat
+            binary
+            potential_offsets.txt
