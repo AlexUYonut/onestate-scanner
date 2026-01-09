@@ -10,10 +10,10 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Descărcare IPA (Cu Reîncercare)
+      - name: Descărcare IPA
         run: |
-          # Folosim parametri care forțează curl să reîncerce dacă pică conexiunea
-          curl -L --retry 5 --retry-delay 5 --connect-timeout 60 "${{ github.event.inputs.ipa_url }}" -o game.ipa
+          # Folosim wget cu reîncercare infinită pentru stabilitate
+          wget -O game.ipa --tries=10 --retry-connrefused --waitretry=5 "${{ github.event.inputs.ipa_url }}"
           
       - name: Extragere Fișiere
         run: |
@@ -21,14 +21,16 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Pregătire Dumper
+      - name: Pregătire Dumper Oficial
         run: |
-          curl -L https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip -o dumper.zip
+          # Descărcăm direct binarul de Linux pentru a evita erorile de .NET
+          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip" -o dumper.zip
           unzip dumper.zip -d dumper_tool
+          chmod +x dumper_tool/Il2CppDumper
 
       - name: Executare Scanare
         run: |
-          dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
+          ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
