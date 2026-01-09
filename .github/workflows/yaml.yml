@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descărcare IPA
-        run: wget -v -O game.ipa "${{ github.event.inputs.ipa_url }}"
+        run: wget -O game.ipa "${{ github.event.inputs.ipa_url }}"
           
       - name: Extragere Fișiere Joc
         run: |
@@ -19,16 +19,17 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Instalare Dumper (Metoda Fără Arhivă)
+      - name: Instalare Dumper
         run: |
-          # Instalăm dumper-ul ca un utilitar global .NET, evitând complet descărcarea de fișiere ZIP
-          dotnet tool install --global il2cppdumper --version 6.7.40 || echo "Deja instalat"
-          echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
+          # Descărcăm varianta de Linux binară într-un mod forțat
+          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip" -o dumper.zip
+          unzip -o dumper.zip -d ./dumper_dir
+          chmod +x ./dumper_dir/Il2CppDumper
 
-      - name: Executare Scanare (Cale Directă)
+      - name: Executare Scanare
         run: |
-          # Rulăm folosind comanda globală
-          /home/runner/.dotnet/tools/il2cppdumper ./binary ./metadata.dat ./output
+          # Rulăm folosind calea locală directă ./
+          ./dumper_dir/Il2CppDumper ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
