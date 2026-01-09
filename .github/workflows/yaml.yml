@@ -12,8 +12,7 @@ jobs:
     steps:
       - name: Descărcare IPA
         run: |
-          # Folosim wget cu reîncercare infinită pentru stabilitate
-          wget -O game.ipa --tries=10 --retry-connrefused --waitretry=5 "${{ github.event.inputs.ipa_url }}"
+          wget -O game.ipa --tries=10 --waitretry=5 "${{ github.event.inputs.ipa_url }}"
           
       - name: Extragere Fișiere
         run: |
@@ -21,16 +20,16 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Pregătire Dumper Oficial
+      - name: Instalare Dumper Direct
         run: |
-          # Descărcăm direct binarul de Linux pentru a evita erorile de .NET
-          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-linux-x64.zip" -o dumper.zip
+          # Descărcăm varianta de Windows și o rulăm cu Wine (este cea mai stabilă metodă pe GitHub Actions)
+          sudo apt-get update && sudo apt-get install -y wine-stable
+          curl -L "https://github.com/Perfare/Il2CppDumper/releases/download/v6.7.40/Il2CppDumper-net6.0.zip" -o dumper.zip
           unzip dumper.zip -d dumper_tool
-          chmod +x dumper_tool/Il2CppDumper
 
       - name: Executare Scanare
         run: |
-          ./dumper_tool/Il2CppDumper ./binary ./metadata.dat ./output
+          dotnet dumper_tool/Il2CppDumper.dll ./binary ./metadata.dat ./output
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
