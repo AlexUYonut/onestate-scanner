@@ -17,18 +17,22 @@ jobs:
         run: |
           unzip game.ipa -d temp_ipa
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
-          find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
+          # Incearca sa gaseasca binarul, indiferent de nume
+          find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \; || cp temp_ipa/Payload/*.app/OneState ./binary || echo "Binar negasit"
 
       - name: Scanare Ultra-Pro OneState
         run: |
-          echo "=== ANALIZA MISCARE (SPEED HACK) ===" > rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_MoveSpeed|get_WalkSpeed|get_RunSpeed|get_SprintSpeed" >> rezultate_scanare.txt
+          echo "=== REZULTATE SCANARE ONESTATE ===" > rezultate_scanare.txt
+          # Folosim "|| true" la final ca sa nu dea eroare daca nu gaseste un cuvant
+          strings -t x ./binary | grep -Ei "get_MoveSpeed|get_WalkSpeed|get_RunSpeed|get_SprintSpeed" >> rezultate_scanare.txt || true
+          strings -t x ./binary | grep -Ei "get_JumpHeight|get_JumpPower|get_Gravity" >> rezultate_scanare.txt || true
+          strings -t x ./binary | grep -Ei "get_Stamina|ConsumeStamina|m_Stamina" >> rezultate_scanare.txt || true
           
-          echo -e "\n=== ANALIZA FIZICA (BIG JUMP) ===" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_JumpHeight|get_JumpPower|get_Gravity" >> rezultate_scanare.txt
-          
-          echo -e "\n=== ANALIZA STAMINA ===" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_Stamina|ConsumeStamina|m_Stamina" >> rezultate_scanare.txt
+          # Verificam daca fisierul e gol
+          if [ ! -s rezultate_scanare.txt ]; then
+            echo "Nu am gasit offset-uri. Verificam toate string-urile de speed..." >> rezultate_scanare.txt
+            strings -t x ./binary | grep -i "speed" | head -n 50 >> rezultate_scanare.txt || true
+          fi
 
       - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
