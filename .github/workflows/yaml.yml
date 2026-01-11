@@ -1,16 +1,39 @@
+name: OneState Scanner Pro
+on: 
+  workflow_dispatch:
+    inputs:
+      ipa_url:
+        description: 'Lipește link-ul IPA'
+        required: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descărcare IPA
+        run: wget -O game.ipa "${{ github.event.inputs.ipa_url }}"
+          
+      - name: Extragere Fișiere Joc
+        run: |
+          unzip game.ipa -d temp_ipa
+          find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
+          find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
+
       - name: Scanare Ultra-Pro OneState
         run: |
           echo "=== ANALIZA MISCARE (SPEED HACK) ===" > rezultate_scanare.txt
-          # Cautam functiile care returneaza viteza de baza, de sprint si de mers
-          strings -t x ./binary | grep -Ei "get_MoveSpeed|get_WalkSpeed|get_RunSpeed|get_SprintSpeed|get_MovementSpeed" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_MoveSpeed|get_WalkSpeed|get_RunSpeed|get_SprintSpeed" >> rezultate_scanare.txt
           
-          echo -e "\n=== ANALIZA FIZICA (BIG JUMP & FLY) ===" >> rezultate_scanare.txt
-          # Cautam variabilele de gravitatie si forta sariturii
-          strings -t x ./binary | grep -Ei "get_JumpHeight|get_JumpPower|get_Gravity|set_GravityMultiplier" >> rezultate_scanare.txt
+          echo -e "\n=== ANALIZA FIZICA (BIG JUMP) ===" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_JumpHeight|get_JumpPower|get_Gravity" >> rezultate_scanare.txt
           
-          echo -e "\n=== ANALIZA COMPONENTE PLAYER (ONESTATE SPECIFIC) ===" >> rezultate_scanare.txt
-          # Cautam clasele care controleaza jucatorul in OneState
-          strings -t x ./binary | grep -Ei "PlayerController|CharacterController|PlayerMovement|FirstPersonController" | head -n 50 >> rezultate_scanare.txt
+          echo -e "\n=== ANALIZA STAMINA ===" >> rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_Stamina|ConsumeStamina|m_Stamina" >> rezultate_scanare.txt
 
-          echo -e "\n=== ANALIZA STAMINA (INFINITE RUN) ===" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_Stamina|ConsumeStamina|m_Stamina|staminaRegen" >> rezultate_scanare.txt
+      - name: Salvare Rezultate
+        uses: upload-artifact@v4
+        with:
+          name: OneState-Final-Offsets
+          path: |
+            rezultate_scanare.txt
+            metadata.dat
