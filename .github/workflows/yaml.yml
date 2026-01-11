@@ -31,7 +31,7 @@ jobs:
           strings -t x ./binary | grep -Ei "get_Stamina|ConsumeStamina|m_Stamina" >> rezultate_scanare.txt
 
       - name: Salvare Rezultate
-        uses: upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: OneState-Final-Offsets
           path: |
