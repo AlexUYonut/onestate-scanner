@@ -1,4 +1,4 @@
-Name: OneState Pro Scanner
+name: OneState Pro Scanner
 on: 
   workflow_dispatch:
     inputs:
