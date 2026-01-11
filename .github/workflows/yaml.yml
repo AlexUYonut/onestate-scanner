@@ -19,32 +19,15 @@ jobs:
           find temp_ipa -name "global-metadata.dat" -exec cp {} ./metadata.dat \;
           find temp_ipa -name "UnityFramework" -exec cp {} ./binary \; || find temp_ipa -name "OneState" -exec cp {} ./binary \;
 
-      - name: Scanare Avansată Offsets (PUBG Level)
+      - name: Scanare Avansată Offsets
         run: |
-          echo "=== ANALIZĂ TEHNICĂ ONESTATE (OFFSETS & RVA) ===" > rezultate_scanare.txt
-          
-          echo -e "\n[1] ESP CORE (ViewMatrix & Camera):" >> rezultate_scanare.txt
-          # Căutăm adresele necesare pentru a face ESP fără crash (WorldToScreen manual)
-          nm -D ./binary | grep -Ei "WorldToScreen|ViewMatrix|GetMain|get_aspect" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "UnityEngine.Camera|get_viewMatrix|get_worldToCameraMatrix" | head -n 20 >> rezultate_scanare.txt
+          echo "=== ANALIZĂ ONESTATE POSIBILE OFFSETS ===" > rezultate_scanare.txt
+          strings -t x ./binary | grep -Ei "get_speed|JumpHeight|VehicleSpeed|Health|get_stamina" >> rezultate_scanare.txt
 
-          echo -e "\n[2] MOVEMENT & PHYSICS (Speed, Jump, Fly):" >> rezultate_scanare.txt
-          # Extragem locația exactă a metodelor de mișcare
-          strings -t x ./binary | grep -Ei "get_speed|set_speed|JumpHeight|GravityMultiplier|set_jumpPower" | head -n 30 >> rezultate_scanare.txt
-          
-          echo -e "\n[3] WEAPON & COMBAT (Aimbot, No Recoil):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_isReloading|FireRate|NoRecoil|Spread|get_aimRotation|BulletVelocity" | head -n 30 >> rezultate_scanare.txt
-
-          echo -e "\n[4] TROLL & VEHICLE (Fly Car, Freeze):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "set_mass|AddForce|Rigidbody|get_isFrozen|set_isStatic|VehicleGravity" | head -n 30 >> rezultate_scanare.txt
-
-          echo -e "\n[5] STATUS & SYSTEM (Stamina, Health):" >> rezultate_scanare.txt
-          strings -t x ./binary | grep -Ei "get_stamina|set_stamina|get_health|set_health|isDead" | head -n 20 >> rezultate_scanare.txt
-
-      - name: Salvare Rezultate Pro
+      - name: Salvare Rezultate
         uses: actions/upload-artifact@v4
         with:
-          name: OneState-Pro-Data
+          name: OneState-Final-Offsets
           path: |
             rezultate_scanare.txt
             metadata.dat
