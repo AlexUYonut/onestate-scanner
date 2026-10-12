@@ -6,6 +6,7 @@ on:
         description: 'Lipește link-ul direct către IPA-ul de One State'
         required: true
 
+
 jobs:
   scan:
     runs-on: ubuntu-latest
